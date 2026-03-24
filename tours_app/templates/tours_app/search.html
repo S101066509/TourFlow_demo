@@ -1,0 +1,148 @@
+{% extends 'tours_app/base.html' %}
+{% block title %}搜尋行程 - demo_page{% endblock %}
+
+{% block content %}
+<div class="container my-5">
+    <div class="section-title">搜尋行程</div>
+    <div class="row mt-3">
+        <!-- 左側 Sidebar 篩選 -->
+        <div class="col-lg-3 mb-4">
+            <div class="card shadow-sm" style="border:none; border-top: 3px solid var(--primary-red); border-radius: 8px;">
+                <div class="card-body">
+                    <h5 class="fw-bold mb-3" style="color: var(--primary-red);"><i class="bi bi-funnel-fill me-1"></i>條件篩選</h5>
+                    <form action="{% url 'search' %}" method="GET">
+                        <!-- 關鍵字 -->
+                        <div class="mb-3">
+                            <label class="form-label fw-semibold small">搜尋關鍵字</label>
+                            <input type="text" name="q" class="form-control" value="{{ q }}" placeholder="輸入目的地或行程關鍵字">
+                        </div>
+
+                        <!-- 目的地 -->
+                        <div class="mb-3">
+                            <label class="form-label fw-semibold small">旅遊目的地</label>
+                            <select name="location" class="form-select">
+                                <option value="">不拘</option>
+                                {% for loc in locations %}
+                                <option value="{{ loc.id }}" {% if location_id == loc.id|stringformat:"d" %}selected{% endif %}>{{ loc.name }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+
+                        <!-- 旅遊標籤 -->
+                        <div class="mb-3">
+                            <label class="form-label fw-semibold small">行程特色 (標籤)</label>
+                            <select name="tag" class="form-select">
+                                <option value="">不限</option>
+                                {% for t in tags %}
+                                <option value="{{ t.id }}" {% if tag_id == t.id|stringformat:"d" %}selected{% endif %}>{{ t.name }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+
+                        <!-- 出發日期範圍 -->
+                        <div class="mb-3">
+                            <label class="form-label fw-semibold small">預定出發日 (從)</label>
+                            <input type="date" name="start_date" class="form-control" value="{{ start_date }}">
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label fw-semibold small">至 (到)</label>
+                            <input type="date" name="end_date" class="form-control" value="{{ end_date }}">
+                        </div>
+
+                        <!-- 排序與天數 -->
+                        <div class="row">
+                            <div class="col-6 mb-3">
+                                <label class="form-label fw-semibold small">天數上限</label>
+                                <input type="number" name="days" class="form-control" value="{{ days }}" placeholder="例如：7" min="1">
+                            </div>
+                            <div class="col-6 mb-3">
+                                <label class="form-label fw-semibold small">排序方式</label>
+                                <select name="sort" class="form-select">
+                                    <option value="">預設</option>
+                                    <option value="price_asc" {% if sort == 'price_asc' %}selected{% endif %}>價格 低→高</option>
+                                    <option value="price_desc" {% if sort == 'price_desc' %}selected{% endif %}>價格 高→低</option>
+                                    <option value="date_asc" {% if sort == 'date_asc' %}selected{% endif %}>日期 近→遠</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <button type="submit" class="btn btn-primary w-100 fw-bold">
+                            <i class="bi bi-search me-1"></i>篩選搜尋
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <!-- 右側行程列表 -->
+        <div class="col-lg-9">
+            {% if q or location_id or days %}
+            <p class="text-muted mb-3">
+                共找到 <strong>{{ tours|length }}</strong> 個符合條件的行程
+                {% if q %} — 關鍵字「<strong>{{ q }}</strong>」{% endif %}
+            </p>
+            {% endif %}
+
+            <div class="row g-4">
+                {% for tour in tours %}
+                <div class="col-md-6">
+                    <div class="card card-tour h-100 shadow-sm" style="border-radius: 8px;">
+                        <!-- 圖片區 (大圖) -->
+                        <div style="height: 180px; overflow: hidden;">
+                            {% if tour.image %}
+                            <img src="{{ tour.image.url }}" class="w-100 h-100" style="object-fit: cover;" alt="{{ tour.title }}">
+                            {% else %}
+                                {% if tour.location.name == '日本' %}
+                                <img src="https://images.unsplash.com/photo-1528360983277-13d401cdc186?w=600&h=300&fit=crop" class="w-100 h-100" style="object-fit: cover;" alt="{{ tour.title }}">
+                                {% elif tour.location.name == '韓國' %}
+                                <img src="https://images.unsplash.com/photo-1553621042-f6e147245754?w=600&h=300&fit=crop" class="w-100 h-100" style="object-fit: cover;" alt="{{ tour.title }}">
+                                {% elif tour.location.name == '歐洲' %}
+                                <img src="https://images.unsplash.com/photo-1502602898657-3e91760cbb34?w=600&h=300&fit=crop" class="w-100 h-100" style="object-fit: cover;" alt="{{ tour.title }}">
+                                {% else %}
+                                <img src="https://images.unsplash.com/photo-1476514525535-07fb3b4ae5f1?w=600&h=300&fit=crop" class="w-100 h-100" style="object-fit: cover;" alt="{{ tour.title }}">
+                                {% endif %}
+                            {% endif %}
+                        </div>
+                        <div class="card-body">
+                            <h5 class="card-title fw-bold">{{ tour.title }}</h5>
+                            <p class="text-muted small mb-2">
+                                <i class="bi bi-geo-alt-fill me-1" style="color: var(--primary-red);"></i>{{ tour.location.name }}
+                                <span class="ms-2"><i class="bi bi-calendar3 me-1"></i>{{ tour.days }} 天</span>
+                            </p>
+                            {% for tag in tour.tags.all %}
+                                {% if tag.name == '熱門' %}
+                                <span class="badge badge-popular badge-tag me-1">{{ tag.name }}</span>
+                                {% elif tag.name == '保證出團' %}
+                                <span class="badge badge-guarantee badge-tag me-1">{{ tag.name }}</span>
+                                {% elif tag.name == '促銷' %}
+                                <span class="badge badge-promo badge-tag me-1">{{ tag.name }}</span>
+                                {% else %}
+                                <span class="badge bg-secondary badge-tag me-1">{{ tag.name }}</span>
+                                {% endif %}
+                            {% endfor %}
+                            <p class="card-text mt-2 small text-muted">{{ tour.description|truncatechars:70 }}</p>
+                            {% if tour.min_price %}
+                            <p class="fw-bold mb-0" style="color: var(--primary-red); font-size: 1.1rem;">
+                                NT$ {{ tour.min_price|floatformat:0 }} 起
+                            </p>
+                            {% endif %}
+                        </div>
+                        <div class="card-footer bg-white border-0 pb-3 px-3">
+                            <a href="{% url 'tour_detail' tour.pk %}" class="btn btn-outline-primary w-100">
+                                <i class="bi bi-eye me-1"></i>查看詳情與梯次
+                            </a>
+                        </div>
+                    </div>
+                </div>
+                {% empty %}
+                <div class="col-12 text-center py-5">
+                    <i class="bi bi-emoji-frown display-1 text-muted"></i>
+                    <p class="text-muted mt-3 fs-5">找不到符合條件的行程，請試試其他搜尋條件。</p>
+                    <a href="{% url 'search' %}" class="btn btn-outline-secondary mt-2">清除篩選條件</a>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

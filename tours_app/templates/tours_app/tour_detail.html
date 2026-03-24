@@ -1,0 +1,139 @@
+{% extends 'tours_app/base.html' %}
+{% block title %}{{ tour.title }} - demo_page{% endblock %}
+
+{% block content %}
+<div class="container my-5">
+    <!-- Breadcrumb -->
+    <nav aria-label="breadcrumb" class="mb-3">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a href="{% url 'home' %}" style="color: var(--primary-red);">首頁</a></li>
+            <li class="breadcrumb-item"><a href="{% url 'search' %}" style="color: var(--primary-red);">搜尋行程</a></li>
+            <li class="breadcrumb-item active">{{ tour.title }}</li>
+        </ol>
+    </nav>
+
+    <!-- 行程資訊 -->
+    <div class="card shadow-sm mb-4" style="border:none; border-top: 3px solid var(--primary-red); border-radius: 8px; overflow:hidden;">
+        <!-- 行程大圖 -->
+        <div style="height: 300px; overflow: hidden;">
+            {% if tour.image %}
+            <img src="{{ tour.image.url }}" class="w-100 h-100" style="object-fit: cover;" alt="{{ tour.title }}">
+            {% else %}
+                {% if tour.location.name == '日本' %}
+                <img src="https://images.unsplash.com/photo-1493976040374-85c8e12f0c0e?w=1200&h=400&fit=crop" class="w-100 h-100" style="object-fit: cover;" alt="{{ tour.title }}">
+                {% elif tour.location.name == '韓國' %}
+                <img src="https://images.unsplash.com/photo-1538485399081-7191377e8241?w=1200&h=400&fit=crop" class="w-100 h-100" style="object-fit: cover;" alt="{{ tour.title }}">
+                {% elif tour.location.name == '歐洲' %}
+                <img src="https://images.unsplash.com/photo-1499856871958-5b9627545d1a?w=1200&h=400&fit=crop" class="w-100 h-100" style="object-fit: cover;" alt="{{ tour.title }}">
+                {% else %}
+                <img src="https://images.unsplash.com/photo-1476514525535-07fb3b4ae5f1?w=1200&h=400&fit=crop" class="w-100 h-100" style="object-fit: cover;" alt="{{ tour.title }}">
+                {% endif %}
+            {% endif %}
+        </div>
+        <div class="card-body p-4">
+            <h2 class="fw-bold mb-3">{{ tour.title }}</h2>
+            <div class="d-flex flex-wrap gap-2 mb-3">
+                <span class="badge bg-dark fs-6"><i class="bi bi-geo-alt-fill me-1"></i>{{ tour.location.name }}</span>
+                <span class="badge bg-dark fs-6"><i class="bi bi-calendar3 me-1"></i>{{ tour.days }} 天</span>
+                {% for tag in tour.tags.all %}
+                    {% if tag.name == '熱門' %}
+                    <span class="badge badge-popular fs-6">{{ tag.name }}</span>
+                    {% elif tag.name == '保證出團' %}
+                    <span class="badge badge-guarantee fs-6">{{ tag.name }}</span>
+                    {% elif tag.name == '促銷' %}
+                    <span class="badge badge-promo fs-6">{{ tag.name }}</span>
+                    {% else %}
+                    <span class="badge bg-secondary fs-6">{{ tag.name }}</span>
+                    {% endif %}
+                {% endfor %}
+            </div>
+            <hr>
+            <p class="fs-5 lh-lg">{{ tour.description }}</p>
+        </div>
+    </div>
+
+    <!-- 出發梯次 -->
+    <div class="section-title"><i class="bi bi-calendar-check me-2"></i>可報名出發梯次</div>
+
+    {% if departures %}
+    <div class="table-responsive mt-3">
+        <table class="table table-hover align-middle shadow-sm" style="border-radius: 8px; overflow:hidden;">
+            <thead style="background: var(--primary-red); color: #fff;">
+                <tr>
+                    <th>出發日期</th>
+                    <th>回程日期</th>
+                    <th>單人售價</th>
+                    <th>剩餘機位</th>
+                    <th class="text-center">報名</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for dep in departures %}
+                <tr>
+                    <td><i class="bi bi-airplane-fill me-1" style="color: var(--primary-red);"></i>{{ dep.start_date|date:"Y/m/d" }}</td>
+                    <td>{{ dep.end_date|date:"Y/m/d" }}</td>
+                    <td class="fw-bold" style="color: var(--primary-red); font-size: 1.05rem;">NT$ {{ dep.price|floatformat:0 }}</td>
+                    <td>
+                        {% if dep.available_seats <= 5 %}
+                        <span class="badge bg-warning text-dark">僅剩 {{ dep.available_seats }} 位</span>
+                        {% elif dep.available_seats <= 10 %}
+                        <span class="badge badge-promo">剩餘 {{ dep.available_seats }} 位</span>
+                        {% else %}
+                        <span class="badge bg-success">{{ dep.available_seats }} 位</span>
+                        {% endif %}
+                    </td>
+                    <td class="text-center">
+                        {% if user.is_authenticated %}
+                        <!-- 已經登入，直接導向結帳頁面 -->
+                        <a href="{% url 'checkout' dep.id %}" class="btn btn-primary btn-sm">
+                            <i class="bi bi-pencil-square me-1"></i>我要報名
+                        </a>
+                        {% else %}
+                        <!-- 未登入，彈出選擇登入或訪客的 Modal -->
+                        <button type="button" class="btn btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#bookingModal{{ dep.id }}">
+                            <i class="bi bi-pencil-square me-1"></i>我要報名
+                        </button>
+                        {% endif %}
+                    </td>
+                </tr>
+
+                {% if not user.is_authenticated %}
+                <!-- Modal：分流邏輯 (訪客 / 會員) -->
+                <div class="modal fade" id="bookingModal{{ dep.id }}" tabindex="-1" aria-hidden="true">
+                    <div class="modal-dialog modal-dialog-centered">
+                        <div class="modal-content" style="border: none; border-radius: 10px; overflow:hidden;">
+                            <div class="modal-header" style="background: var(--primary-red); color: #fff;">
+                                <h5 class="modal-title fw-bold"><i class="bi bi-pencil-square me-2"></i>報名確認</h5>
+                                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                            </div>
+                            <div class="modal-body">
+                                <p class="mb-1"><strong>行程：</strong>{{ tour.title }}</p>
+                                <p class="mb-1"><strong>出發日期：</strong>{{ dep.start_date|date:"Y/m/d" }}</p>
+                                <p class="mb-1"><strong>單人售價：</strong><span class="fw-bold" style="color: var(--primary-red);">NT$ {{ dep.price|floatformat:0 }}</span></p>
+                                <p class="mb-3"><strong>剩餘機位：</strong>{{ dep.available_seats }} 位</p>
+                                <hr>
+                                <p class="text-muted small mb-0">請選擇報名方式：</p>
+                            </div>
+                            <div class="modal-footer d-flex justify-content-between">
+                                <a href="{% url 'checkout' dep.id %}" class="btn btn-outline-primary flex-fill me-2">
+                                    <i class="bi bi-person me-1"></i>訪客報名
+                                </a>
+                                <a href="{% url 'login' %}?next={% url 'checkout' dep.id %}" class="btn btn-primary flex-fill">
+                                    <i class="bi bi-person-lock me-1"></i>會員登入報名
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                {% endif %}
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    {% else %}
+    <div class="alert alert-warning text-center mt-3">
+        <i class="bi bi-exclamation-triangle me-2"></i>目前此行程暫無可報名的出發梯次，請稍後再查看。
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

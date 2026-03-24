@@ -1,0 +1,65 @@
+{% extends 'tours_app/base.html' %}
+{% load static %}
+{% block title %}會員登入 - demo_page{% endblock %}
+
+{% block content %}
+<div class="container my-5">
+    <div class="row justify-content-center">
+        <div class="col-md-5">
+            <div class="card shadow"
+                style="border: none; border-top: 3px solid var(--primary-red); border-radius: 10px;">
+                <div class="card-header text-white text-center fw-bold" style="background: var(--primary-red);">
+                    <h4 class="mb-0"><i class="bi bi-person-lock me-2"></i>會員登入</h4>
+                </div>
+                <div class="card-body p-4">
+                    <!-- 錯誤訊息 -->
+                    {% if form.errors %}
+                    <div class="alert alert-danger border-0">
+                        <i class="bi bi-exclamation-triangle-fill me-1"></i>帳號或密碼錯誤，請重新輸入。
+                    </div>
+                    {% endif %}
+
+                    <form method="POST">
+                        <!-- CSRF Token -->
+                        {% csrf_token %}
+                        <div class="mb-3">
+                            <label for="id_username" class="form-label fw-semibold">帳號</label>
+                            <!-- django 快速登入模板 name="username" -->
+                            <input type="text" name="username" id="id_username" class="form-control" placeholder="請輸入帳號"
+                                autofocus required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="id_password" class="form-label fw-semibold">密碼</label>
+                            <div class="input-group">
+                                <!-- django 快速登入模板 name="password" -->
+                                <input type="password" name="password" id="id_password" class="form-control"
+                                    placeholder="請輸入密碼" required>
+                                <button class="btn btn-outline-secondary" type="button" id="togglePassword">
+                                    <i class="bi bi-eye"></i>
+                                </button>
+                            </div>
+                        </div>
+                        <!-- 隱藏欄位，記錄預期因登入中斷前導向的頁面 -->
+                        {% if next %}
+                        <input type="hidden" name="next" value="{{ next }}">
+                        {% endif %}
+
+                        <button type="submit" class="btn btn-primary w-100 mt-2 fw-bold" style="letter-spacing: 4px;">
+                            登　入
+                        </button>
+                    </form>
+                </div>
+                <div class="card-footer text-center bg-white" style="border-radius: 0 0 10px 10px;">
+                    <small class="text-muted">尚未有帳號？<a href="{% url 'register' %}" class="fw-bold"
+                            style="color: var(--primary-red); text-decoration: none;">點此註冊</a></small>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<!-- 密碼顯示切換，js檔案位置在static/tours_app/js/login.js -->
+<script src="{% static 'tours_app/js/login.js' %}"></script>
+{% endblock %}

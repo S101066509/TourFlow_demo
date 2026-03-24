@@ -1,0 +1,171 @@
+{% extends 'tours_app/base.html' %}
+{% load static %}
+{% block title %}報名紀錄 - demo_page{% endblock %}
+
+{% block content %}
+{% if is_auth_search %}
+<!-- ★ 會員專屬：我的報名紀錄 -->
+<div class="bg-light py-5">
+    <div class="container text-center">
+        <h2 class="fw-bold mb-3"><i class="bi bi-person-lines-fill me-2" style="color: var(--primary-red);"></i>我的報名紀錄</h2>
+        <p class="text-muted">歡迎回來，<strong class="text-dark">{{ user.username }}</strong>。以下為您報名過的所有旅程檔案。</p>
+    </div>
+</div>
+
+<div class="container my-5">
+    <!-- 未來旅程區塊 -->
+    <h4 class="fw-bold mb-4" style="color: #198754;"><i class="bi bi-calendar-check me-2"></i>即將出發 - 未來旅程</h4>
+    {% if future_orders %}
+        <div class="row g-4">
+            {% for order in future_orders %}
+            <div class="col-lg-6">
+                <div class="card shadow-sm border-0 h-100" style="border-radius: 15px; border-top: 4px solid #198754 !important;">
+                    <div class="card-body p-4">
+                        <div class="d-flex justify-content-between align-items-start mb-3">
+                            <h5 class="fw-bold text-dark mb-0">{{ order.departure.tour.title }}</h5>
+                            <span class="badge bg-success ms-2">即將出發</span>
+                        </div>
+                        <p class="text-muted small mb-2"><i class="bi bi-upc-scan me-1"></i>訂單編號：{{ order.order_number }}</p>
+                        <hr class="text-muted">
+                        <div class="row text-muted small">
+                            <div class="col-6 mb-2"><strong>出發日：</strong>{{ order.departure.start_date|date:"Y/m/d" }}</div>
+                            <div class="col-6 mb-2"><strong>目的地：</strong>{{ order.departure.tour.location.name }}</div>
+                            <div class="col-6 mb-0"><strong>人數：</strong>{{ order.pax }} 人</div>
+                            <div class="col-6 mb-0"><strong>總金額：</strong><span class="text-danger fw-bold">NT$ {{ order.total_price }}</span></div>
+                        </div>
+                        <div class="mt-4 text-end">
+                            <a href="{% url 'tour_detail' order.departure.tour.id %}" class="btn btn-outline-success btn-sm px-3">查看行程</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    {% else %}
+        <div class="alert alert-light text-muted border text-center py-4 rounded-3 shadow-sm">
+            <i class="bi bi-inbox fs-4 d-block mb-2"></i>目前沒有即將出發的旅程，<a href="{% url 'search' %}" class="fw-bold" style="color: var(--primary-red); text-decoration: none;">快去探索新行程吧！</a>
+        </div>
+    {% endif %}
+
+    <hr class="my-5 border-secondary border-opacity-25">
+
+    <!-- 歷史專區 -->
+    <h4 class="fw-bold mb-4 text-secondary"><i class="bi bi-clock-history me-2"></i>回憶之旅 - 歷史專區</h4>
+    {% if past_orders %}
+        <div class="row g-4">
+            {% for order in past_orders %}
+            <div class="col-lg-6">
+                <div class="card shadow-sm border-0 h-100 bg-light" style="border-radius: 15px; border-top: 4px solid #6c757d !important; opacity: 0.85;">
+                    <div class="card-body p-4">
+                        <div class="d-flex justify-content-between align-items-start mb-3">
+                            <h5 class="fw-bold text-secondary mb-0">{{ order.departure.tour.title }}</h5>
+                            <span class="badge bg-secondary ms-2">已出發</span>
+                        </div>
+                        <p class="text-muted small mb-2"><i class="bi bi-upc-scan me-1"></i>訂單編號：{{ order.order_number }}</p>
+                        <hr class="text-muted">
+                        <div class="row text-muted small">
+                            <div class="col-6 mb-2"><strong>出發日：</strong>{{ order.departure.start_date|date:"Y/m/d" }}</div>
+                            <div class="col-6 mb-2"><strong>目的地：</strong>{{ order.departure.tour.location.name }}</div>
+                            <div class="col-6 mb-0"><strong>人數：</strong>{{ order.pax }} 人</div>
+                            <div class="col-6 mb-0"><strong>總金額：</strong>NT$ {{ order.total_price }}</div>
+                        </div>
+                        <div class="mt-4 text-end">
+                            <a href="{% url 'tour_detail' order.departure.tour.id %}" class="btn btn-outline-secondary btn-sm px-3">重新回味</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    {% else %}
+        <p class="text-muted ms-2">尚無歷史旅程紀錄。</p>
+    {% endif %}
+</div>
+
+{% else %}
+<!-- ★ 訪客單筆查詢 (原本的邏輯) -->
+<div class="bg-light py-5">
+    <div class="container text-center">
+        <h2 class="fw-bold mb-3"><i class="bi bi-search me-2" style="color: var(--primary-red);"></i>報名紀錄查詢</h2>
+        <p class="text-muted">請輸入您的專屬「訂單編號」查詢行程詳情與狀態</p>
+        
+        <div class="row justify-content-center mt-4">
+            <div class="col-md-6">
+                <form method="POST" class="d-flex shadow-sm rounded">
+                    {% csrf_token %}
+                    <input type="text" name="order_number" class="form-control form-control-lg border-0" placeholder="例如：TG20260323ABCD" required autofocus>
+                    <button type="submit" class="btn btn-primary px-4 fw-bold ms-2">查 詢</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="container my-5">
+    {% if error_msg %}
+    <div class="alert alert-danger text-center shadow-sm">
+        <i class="bi bi-exclamation-triangle-fill me-2"></i>{{ error_msg }}
+    </div>
+    {% endif %}
+
+    {% if order %}
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            <div class="card shadow border-0" style="border-radius: 15px;">
+                {% if is_future %}
+                <div class="card-header text-white text-center py-3 fw-bold bg-success" style="border-radius: 15px 15px 0 0;">
+                    <i class="bi bi-calendar-check me-2"></i>即將出發 - 未來旅程
+                </div>
+                {% else %}
+                <div class="card-header text-white text-center py-3 fw-bold bg-secondary" style="border-radius: 15px 15px 0 0;">
+                    <i class="bi bi-clock-history me-2"></i>回憶之旅 - 歷史專區
+                </div>
+                {% endif %}
+
+                <div class="card-body p-5">
+                    <div class="row mb-4">
+                        <div class="col-md-8">
+                            <h4 class="fw-bold text-dark">{{ order.departure.tour.title }}</h4>
+                            <span class="badge text-bg-light border text-muted">訂單編號: {{ order.order_number }}</span>
+                            <span class="badge text-bg-light border text-muted ms-2">成立時間: {{ order.created_at|date:"Y/m/d H:i" }}</span>
+                        </div>
+                        <div class="col-md-4 text-md-end mt-3 mt-md-0">
+                            <h3 class="text-danger fw-bold mb-0">NT$ {{ order.total_price }}</h3>
+                            <small class="text-muted">報名人數：{{ order.pax }} 人</small>
+                        </div>
+                    </div>
+
+                    <hr class="text-muted mb-4">
+
+                    <div class="row g-4">
+                        <div class="col-md-6">
+                            <div class="p-4 bg-light rounded shadow-sm h-100">
+                                <h6 class="fw-bold text-muted mb-3"><i class="bi bi-luggage-fill me-2"></i>行程資訊</h6>
+                                <p class="mb-1"><strong>目的地：</strong>{{ order.departure.tour.location.name }}</p>
+                                <p class="mb-1"><strong>出發日期：</strong>{{ order.departure.start_date|date:"Y年 m月 d日" }}</p>
+                                <p class="mb-0"><strong>回程日期：</strong>{{ order.departure.end_date|date:"Y年 m月 d日" }} ({{ order.departure.tour.days }} 天)</p>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="p-4 bg-light rounded shadow-sm h-100">
+                                <h6 class="fw-bold text-muted mb-3"><i class="bi bi-person-lines-fill me-2"></i>聯絡人資訊</h6>
+                                <p class="mb-1"><strong>聯絡姓名：</strong>{{ order.contact_name|slice:":1" }}**</p>
+                                <p class="mb-1"><strong>聯絡電話：</strong>{{ order.contact_phone|slice:":3" }}****{{ order.contact_phone|slice:"-3:" }}</p>
+                                <p class="mb-0"><strong>聯絡信箱：</strong>{{ order.contact_email|slice:":3" }}***@{{ order.contact_email|slice:"-10:" }}</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="mt-5 text-center">
+                        <a href="{% url 'tour_detail' order.departure.tour.id %}" class="btn btn-outline-secondary">
+                            <i class="bi bi-box-arrow-up-right me-1"></i>查看原行程頁面
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+</div>
+{% endif %}
+{% endblock %}

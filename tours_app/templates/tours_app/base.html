@@ -1,0 +1,132 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="zh-Hant">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}demo_page 旅遊預訂系統{% endblock %}</title>
+    <!-- Bootstrap 5 CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Bootstrap Icons -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet">
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@300;400;500;700;900&display=swap"
+        rel="stylesheet">
+    <!-- demo_page 自訂樣式 -->
+    <link href="{% static 'tours_app/css/style.css' %}" rel="stylesheet">
+    {% block extra_css %}{% endblock %}
+</head>
+
+<body>
+
+    <!-- Top Utility Bar (上方工具列) -->
+    <div class="top-bar py-1">
+        <div class="container d-flex justify-content-end align-items-center gap-3">
+            <!-- 登入 / 註冊 -->
+            {% if user.is_authenticated %}
+            <a href="{% url 'wip' %}"><i class="bi bi-person-circle me-1"></i>{{ user.username }}</a>
+            <form id="logout-form" action="{% url 'logout' %}" method="post" style="display: none;">
+                <!-- 登出post帶上csrf_token-->
+                {% csrf_token %}
+            </form>
+            <a href="javascript:void(0)" onclick="document.getElementById('logout-form').submit();">
+                <i class="bi bi-box-arrow-right me-1"></i>登出
+            </a>
+            {% else %}
+            <a href="{% url 'login' %}" class="btn-login"><i class="bi bi-person me-1"></i>登入 / 註冊</a>
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- Main Navbar (主導覽列 + 紅色底線) -->
+    <nav class="navbar navbar-expand-lg main-nav sticky-top">
+        <div class="container">
+            <a class="navbar-brand" href="{% url 'home' %}">
+                <i class="bi bi-airplane-fill me-1"></i>demo_page
+            </a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#mainNavbar">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="mainNavbar">
+                <ul class="navbar-nav ms-auto">
+                    <li class="nav-item">
+                        <a class="nav-link" href="{% url 'home' %}">首頁</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{% url 'search' %}">
+                            團體旅遊 <span class="badge badge-hot ms-1">HOT</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{% url 'booking_search' %}">查詢報名紀錄</a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Messages -->
+    {% if messages %}
+    <div class="container mt-3">
+        {% for message in messages %}
+        <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+            {{ message }}
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+        {% endfor %}
+    </div>
+    {% endif %}
+
+    <!-- Main Content -->
+    <main>
+        {% block content %}{% endblock %}
+    </main>
+
+    <!-- Footer (多欄式) -->
+    <footer class="site-footer">
+        <div class="container">
+            <div class="row">
+                <div class="col-lg-3 mb-4">
+                    <div class="footer-brand mb-2"><i class="bi bi-airplane-fill me-1"></i>demo_page</div>
+                    <small class="d-block text-secondary">demo_page 國際旅行社</small>
+                    <small class="d-block text-secondary mt-1">台北市中山區xx路 x 段 x 號</small>
+                    <small class="d-block text-secondary">客服專線：(02) 1234-5678</small>
+                </div>
+                <div class="col-lg-3 col-6 mb-4">
+                    <div class="footer-title">關於我們</div>
+                    <ul class="list-unstyled">
+                        <li class="mb-1"><a href="{% url 'wip' %}">公司簡介</a></li>
+                        <li class="mb-1"><a href="{% url 'wip' %}">菁英招募</a></li>
+                        <li class="mb-1"><a href="{% url 'wip' %}">全省服務據點</a></li>
+                    </ul>
+                </div>
+                <div class="col-lg-3 col-6 mb-4">
+                    <div class="footer-title">旅客服務</div>
+                    <ul class="list-unstyled">
+                        <li class="mb-1"><a href="{% url 'wip' %}">護照簽證</a></li>
+                        <li class="mb-1"><a href="{% url 'wip' %}">旅遊百科</a></li>
+                        <li class="mb-1"><a href="{% url 'wip' %}">旅遊攻略</a></li>
+                    </ul>
+                </div>
+                <div class="col-lg-3 col-6 mb-4">
+                    <div class="footer-title">訂購須知</div>
+                    <ul class="list-unstyled">
+                        <li class="mb-1"><a href="{% url 'wip' %}">常見問題</a></li>
+                        <li class="mb-1"><a href="{% url 'wip' %}">訂購說明</a></li>
+                        <li class="mb-1"><a href="{% url 'wip' %}">隱私權政策</a></li>
+                    </ul>
+                </div>
+            </div>
+            <div class="copy text-center">© 2026 demo_page. All rights reserved.</div>
+        </div>
+    </footer>
+
+    <!-- Bootstrap 5 JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+    <!-- demo_page 自訂 JS -->
+    <script src="{% static 'tours_app/js/main.js' %}"></script>
+    {% block extra_js %}{% endblock %}
+</body>
+
+</html>

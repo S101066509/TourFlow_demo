@@ -1,0 +1,286 @@
+/* ============================
+   demo_page - 全站樣式表
+   ============================ */
+
+/* === CSS Variables === */
+:root {
+    --primary-red: #ce263c;
+    --primary-red-hover: #a91e30;
+    --dark-nav: #2c2c2c;
+    --dark-footer: #3a3a3a;
+    --light-bg: #f5f5f5;
+}
+
+/* === Base === */
+body {
+    font-family: 'Noto Sans TC', sans-serif;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    color: #333;
+}
+
+main {
+    flex: 1;
+}
+
+/* === Top Utility Bar === */
+.top-bar {
+    background: var(--dark-nav);
+    font-size: 0.85rem;
+}
+
+.top-bar a {
+    color: #ccc;
+    text-decoration: none;
+    transition: color .2s;
+}
+
+.top-bar a:hover {
+    color: #fff;
+}
+
+.top-bar .btn-login {
+    background: var(--primary-red);
+    color: #fff;
+    border: none;
+    border-radius: 3px;
+    padding: 3px 14px;
+    font-size: 0.82rem;
+    transition: background .2s;
+}
+
+.top-bar .btn-login:hover {
+    background: var(--primary-red-hover);
+    color: #fff;
+}
+
+/* === Main Navbar === */
+.main-nav {
+    background: #fff;
+    border-bottom: 3px solid var(--primary-red);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, .08);
+}
+
+.main-nav .navbar-brand {
+    font-weight: 900;
+    font-size: 1.5rem;
+    color: var(--primary-red);
+}
+
+.main-nav .nav-link {
+    color: #333;
+    font-weight: 500;
+    padding: 0.8rem 1rem;
+    transition: color .2s;
+}
+
+.main-nav .nav-link:hover,
+.main-nav .nav-link.active {
+    color: var(--primary-red);
+}
+
+.badge-hot {
+    background: var(--primary-red);
+    font-size: 0.65rem;
+    vertical-align: super;
+    border-radius: 3px;
+    padding: 2px 5px;
+}
+
+/* === Cards === */
+.card-tour {
+    border: none;
+    border-radius: 8px;
+    overflow: hidden;
+    transition: all .3s ease;
+}
+
+.card-tour:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 10px 30px rgba(0, 0, 0, .15);
+}
+
+/* === Buttons (Red Theme) === */
+.btn-primary {
+    background: var(--primary-red) !important;
+    border-color: var(--primary-red) !important;
+}
+
+.btn-primary:hover {
+    background: var(--primary-red-hover) !important;
+    border-color: var(--primary-red-hover) !important;
+}
+
+.btn-outline-primary {
+    color: var(--primary-red) !important;
+    border-color: var(--primary-red) !important;
+}
+
+.btn-outline-primary:hover {
+    background: var(--primary-red) !important;
+    border-color: var(--primary-red) !important;
+    color: #fff !important;
+}
+
+/* === Featured Image Cards === */
+.featured-card {
+    position: relative;
+    border-radius: 8px;
+    overflow: hidden;
+    height: 260px;
+    cursor: pointer;
+    transition: transform .3s ease;
+}
+
+.featured-card:hover {
+    transform: scale(1.03);
+}
+
+.featured-card img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform .5s ease;
+}
+
+.featured-card:hover img {
+    transform: scale(1.08);
+}
+
+.featured-card .overlay {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    padding: 20px;
+    background: linear-gradient(transparent, rgba(0, 0, 0, .7));
+    color: #fff;
+}
+
+.featured-card .overlay h5 {
+    font-weight: 700;
+    margin-bottom: 4px;
+}
+
+.featured-card .overlay p {
+    font-size: 0.85rem;
+    margin-bottom: 0;
+    opacity: .9;
+}
+
+/* === Section Title (紅色底線) === */
+.section-title {
+    font-weight: 900;
+    font-size: 1.5rem;
+    display: inline-block;
+    border-bottom: 3px solid var(--primary-red);
+    padding-bottom: 6px;
+    margin-bottom: 1.5rem;
+}
+
+/* === Search Box Floating === */
+.search-floating-box {
+    background: #fff;
+    border-radius: 10px;
+    box-shadow: 0 8px 30px rgba(0, 0, 0, .2);
+    padding: 2rem;
+}
+
+.form-floating label {
+    color: var(--primary-red);
+    font-weight: 500;
+}
+
+.search-floating-box .btn-search {
+    background: var(--primary-red);
+    border: none;
+    color: #fff;
+    font-size: 1.15rem;
+    font-weight: 700;
+    letter-spacing: 8px;
+    padding: 12px;
+    transition: background .2s;
+}
+
+.search-floating-box .btn-search:hover {
+    background: var(--primary-red-hover);
+}
+
+/* === Hot Tags === */
+.hot-tags a {
+    color: #555;
+    text-decoration: none;
+    transition: color .2s;
+}
+
+.hot-tags a:hover {
+    color: var(--primary-red);
+}
+
+.hot-tags .label {
+    color: var(--primary-red);
+    font-weight: 700;
+}
+
+/* === Footer === */
+footer.site-footer {
+    background: var(--dark-footer);
+    color: #ccc;
+    padding: 3rem 0 2rem;
+}
+
+footer .footer-title {
+    color: var(--primary-red);
+    font-weight: 700;
+    font-size: 1rem;
+    margin-bottom: 1rem;
+}
+
+footer a {
+    color: #aaa;
+    text-decoration: none;
+    font-size: 0.88rem;
+    transition: color .2s;
+}
+
+footer a:hover {
+    color: #fff;
+}
+
+footer .footer-brand {
+    color: var(--primary-red);
+    font-weight: 900;
+    font-size: 1.3rem;
+}
+
+footer .copy {
+    border-top: 1px solid #555;
+    padding-top: 1rem;
+    margin-top: 2rem;
+    font-size: 0.8rem;
+    color: #888;
+}
+
+/* === Badge Tags === */
+.badge-tag {
+    font-size: 0.75rem;
+}
+
+.badge-guarantee {
+    background: #28a745;
+}
+
+.badge-promo {
+    background: #e67e22;
+}
+
+.badge-popular {
+    background: var(--primary-red);
+}
+
+/* === Carousel === */
+.hero-carousel .carousel-item img {
+    height: 480px;
+    object-fit: cover;
+}
