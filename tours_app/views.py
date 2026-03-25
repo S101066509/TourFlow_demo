@@ -159,7 +159,7 @@ def checkout(request, departure_id):
         }
 
     if request.method == 'POST':
-        #透過OrderForm產生表單實體
+        #透過OrderForm產生表單實體，該表單是由自己定義。
         form = OrderForm(request.POST)
         if form.is_valid():
             pax = form.cleaned_data['pax']
@@ -196,7 +196,7 @@ def register(request):
     及時註冊頁面 (Registration)
     """
     if request.method == 'POST':
-        #透過UserCreationForm產生表單實體
+        #透過UserCreationForm產生表單實體，本身已具有帳號 密碼 密碼確認等模板。
         form = UserCreationForm(request.POST)
         if form.is_valid():
             user = form.save()

@@ -58,10 +58,15 @@
                     <form method="POST">
                         {% csrf_token %}
 
+                        <!-- 依序產生訂單報名所需欄位 (如：姓名、電話、信箱、人數) -->
                         {% for field in form %}
                         <div class="mb-3">
                             <label for="{{ field.id_for_label }}" class="form-label fw-semibold">{{ field.label }}</label>
+                            
+                            <!-- 產生輸入框 (Input Box)，樣式已在 forms.py 中定義 -->
                             {{ field }}
+                            
+                            <!-- 處理並顯示該欄位的驗證錯誤訊息 (如：人數超出剩餘機位) -->
                             {% if field.errors %}
                             <div class="text-danger small mt-1">
                                 {% for error in field.errors %}
