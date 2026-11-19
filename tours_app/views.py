@@ -1,8 +1,15 @@
 from django.shortcuts import render, get_object_or_404, redirect
+from django.conf import settings
+from django.core import signing
+from django.core.cache import cache
+from django.core.mail import send_mail
+from django.http import Http404
+from django.views.decorators.cache import never_cache
 from django.db.models import Q, Min
 from django.contrib import messages
 from django.urls import reverse
 from datetime import date
+import logging
 from django.db import transaction
 from django.contrib.auth import login
 from django.contrib.auth.forms import UserCreationForm
@@ -141,7 +148,8 @@ def checkout(request, departure_id):
     # 使用 select_for_update 避免併發 (Concurrency) 扣庫存的問題 (交易安全)
     departure = get_object_or_404(
         Departure.objects.select_for_update(), 
-        pk=departure_id, 
+        pk=departure_id,
+        tour__is_active=True,
         start_date__gte=date.today()
     )
     
@@ -181,6 +189,9 @@ def checkout(request, departure_id):
                 departure.save()
                 order.save()
                 
+                if order.user_id is None:
+                    recent = request.session.get("guest_bookings", [])
+                    request.session["guest_bookings"] = (recent + [order.pk])[-10:]
                 return redirect('booking_success', order_number=order.order_number)
     else:
         form = OrderForm(initial=initial_data)
@@ -210,14 +221,25 @@ def register(request):
     return render(request, 'tours_app/register.html', {'form': form})
 
 #=======================報名成功=======================
+@never_cache
 def booking_success(request, order_number):
     """
     報名成功頁面
     """
     order = get_object_or_404(Order, order_number=order_number)
+    if order.user_id is None:
+        if order.pk not in request.session.get("guest_bookings", []):
+            raise Http404
+    elif order.user_id != request.user.pk:
+        raise Http404
     return render(request, 'tours_app/booking_success.html', {'order': order})
 
 #=======================報名查詢=======================
+GUEST_LOOKUP_SALT = "tours.guest-lookup.v1"
+GUEST_CODE_LIFETIME = 15 * 60
+
+
+@never_cache
 def booking_search(request):
     """
     報名紀錄查詢頁面
@@ -243,29 +265,41 @@ def booking_search(request):
             'is_auth_search': True
         })
         
-    # 2. 訪客查詢邏輯
-    #先設定預設值，用於初始渲染，因為回傳有  'order': order
-    order = None
-    error_msg = None
-    is_future = None
-    
-    if request.method == 'POST':
-        order_number = request.POST.get('order_number', '').strip()
-        if order_number:
+    context = {"is_auth_search": False}
+    if request.method == "POST":
+        if "lookup_code" in request.POST:
             try:
-                order = Order.objects.get(order_number=order_number)
-                is_future = order.departure.start_date > date.today()
-            except Order.DoesNotExist:
-                error_msg = "查無此訂單編號，請重新確認。"
+                order_id = signing.loads(
+                    request.POST["lookup_code"].strip(), salt=GUEST_LOOKUP_SALT,
+                    max_age=GUEST_CODE_LIFETIME,
+                )
+                order = Order.objects.get(pk=order_id, user__isnull=True)
+            except (signing.BadSignature, Order.DoesNotExist):
+                context["error_msg"] = "查詢碼無效或已過期，請重新索取。"
+            else:
+                context.update(order=order, is_future=order.departure.start_date > date.today())
         else:
-            error_msg = "請輸入訂單編號。"
-            
-    return render(request, 'tours_app/booking_search.html', {
-        'order': order,
-        'error_msg': error_msg,
-        'is_future': is_future,
-        'is_auth_search': False
-    })
+            number = request.POST.get("order_number", "").strip()
+            email = request.POST.get("contact_email", "").strip()
+            order = Order.objects.filter(
+                order_number=number, contact_email__iexact=email, user__isnull=True,
+            ).first() if number and email else None
+            if order is not None:
+                cooldown = f"guest-booking-mail:{order.pk}"
+                if cache.add(cooldown, True, timeout=60):
+                    code = signing.dumps(order.pk, salt=GUEST_LOOKUP_SALT)
+                    try:
+                        send_mail(
+                            "旅程訂單查詢碼",
+                            f"請在報名查詢頁輸入以下查詢碼，15 分鐘內有效。\n\n{code}",
+                            settings.DEFAULT_FROM_EMAIL, [order.contact_email],
+                        )
+                    except (OSError, RuntimeError):
+                        cache.delete(cooldown)
+                        logging.getLogger(__name__).exception("Guest lookup email delivery failed")
+            context["notice"] = "若訂單與信箱相符，查詢碼將寄到訂單的聯絡信箱。"
+
+    return render(request, 'tours_app/booking_search.html', context)
 
 
 #=======================施工中頁面=======================
