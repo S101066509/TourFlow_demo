@@ -169,3 +169,13 @@ MEDIA_ROOT = BASE_DIR / 'media'
 # 2. 須設定 Nginx/Apache 指向 MEDIA_ROOT，或安裝 WhiteNoise 處理靜態資源。
 # 3. 確保伺服器資料夾權限允許 Django 寫入 media/ 目錄。
 
+
+# 訪客訂單查詢信
+EMAIL_HOST = os.getenv("EMAIL_HOST", "localhost")
+EMAIL_PORT = int(os.getenv("EMAIL_PORT", "25"))
+EMAIL_HOST_USER = os.getenv("EMAIL_HOST_USER", "")
+EMAIL_HOST_PASSWORD = os.getenv("EMAIL_HOST_PASSWORD", "")
+EMAIL_USE_TLS = os.getenv("EMAIL_USE_TLS", "false").lower() == "true"
+EMAIL_USE_SSL = os.getenv("EMAIL_USE_SSL", "false").lower() == "true"
+EMAIL_TIMEOUT = 8
+DEFAULT_FROM_EMAIL = os.getenv("DEFAULT_FROM_EMAIL", "webmaster@localhost")

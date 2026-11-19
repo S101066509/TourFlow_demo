@@ -87,16 +87,23 @@
 <div class="bg-light py-5">
     <div class="container text-center">
         <h2 class="fw-bold mb-3"><i class="bi bi-search me-2" style="color: var(--primary-red);"></i>報名紀錄查詢</h2>
-        <p class="text-muted">請輸入您的專屬「訂單編號」查詢行程詳情與狀態</p>
-        
-        <div class="row justify-content-center mt-4">
-            <div class="col-md-6">
-                <form method="POST" class="d-flex shadow-sm rounded">
-                    {% csrf_token %}
-                    <input type="text" name="order_number" class="form-control form-control-lg border-0" placeholder="例如：TG20260323ABCD" required autofocus>
-                    <button type="submit" class="btn btn-primary px-4 fw-bold ms-2">查 詢</button>
-                </form>
-            </div>
+        <p class="text-muted">輸入訂單編號及報名時的信箱，我們會寄送 15 分鐘內有效的查詢碼。</p>
+        <div class="col-md-6 mx-auto">
+            <form method="post" class="d-grid gap-2 mb-4">
+                {% csrf_token %}
+                <label for="order-number">訂單編號</label>
+                <input id="order-number" name="order_number" class="form-control" required>
+                <label for="contact-email">訂單聯絡信箱</label>
+                <input id="contact-email" type="email" name="contact_email" class="form-control" required>
+                <button class="btn btn-outline-primary">寄送查詢碼</button>
+            </form>
+            {% if notice %}<p role="status">{{ notice }}</p>{% endif %}
+            <form method="post" class="d-grid gap-2">
+                {% csrf_token %}
+                <label for="lookup-code">信件中的查詢碼</label>
+                <input id="lookup-code" name="lookup_code" class="form-control" required autocomplete="off">
+                <button class="btn btn-primary">查看訂單</button>
+            </form>
         </div>
     </div>
 </div>

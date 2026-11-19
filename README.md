@@ -16,7 +16,7 @@
 
 ### 3. 個人化報名記錄 Dashboard
 *   **旅程記錄**：可查看所有歷史訂單。自動分類為「即將出發 (Upcoming)」與「回憶之旅 (History)」。
-*   **訪客訂單查詢**：訪客可透過「訂單編號」查詢訂單狀態。
+*   **訪客訂單查詢**：訪客輸入訂單編號和原聯絡信箱後，使用寄到該信箱的限時查詢碼查看訂單。既有訂單也適用。請在 `.env` 設定 SMTP 的 `EMAIL_HOST`、`EMAIL_PORT`、`DEFAULT_FROM_EMAIL`，以及郵件服務要求的 `EMAIL_HOST_USER`、`EMAIL_HOST_PASSWORD`、`EMAIL_USE_TLS` 或 `EMAIL_USE_SSL`。
 
 ### 4. 後台管理與動態 Banners
 *   **django admin**：可從後台管理行程與訂單。
